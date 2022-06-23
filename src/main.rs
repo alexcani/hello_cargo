@@ -23,6 +23,10 @@ fn another_function_2(x: i32) {  // annotated types
     };
 
     println!("other x is {}", x);
+
+    // if statements are expressions
+    let x = if x > 5 { 4 } else { 3 };
+    println!("yet another x is {}", x);
 }
 
 // Return values are simply expressions at the end of a function
