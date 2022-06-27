@@ -33,7 +33,29 @@ fn main() {
 
     // Instead of giving ownership and taking back,
     // we can just borrow ownership using references
+    let t = value_by_reference(&x);
+    println!("t: {}", t);
 
+    let t = value_by_mutable_reference(&mut x);
+    println!("new x: {}, new t: {}", x, t);
+
+    // Local mutable reference
+    let r = &mut x;
+    r.push_str("more");
+    // r stops being used here
+    // Non-lexical lifetime understands that it is now out of scope
+    // and allow borrowing x again
+
+    println!("x: {}", x);
+    x.push_str(" from here as well");
+    println!("x: {}", x);
+
+    let g = &mut x;  // new borrowing of x as mutable because r is out of scope
+    g.push_str("haha");  // g goes out of scope after this line
+    println!("x: {}", x);
+
+    let f = &x;  // new immutable borrow of x
+    println!("f: {}", f);
 }
 
 fn some_function(value: String) {
@@ -51,4 +73,13 @@ fn gives_ownership() -> String {
 
 fn takes_then_gives(value: String) -> String {
     value
+}
+
+fn value_by_reference(value: &String) -> usize {
+    value.len()
+}
+
+fn value_by_mutable_reference(value: &mut String) -> usize {
+    value.push_str("haha");
+    value.len()
 }
