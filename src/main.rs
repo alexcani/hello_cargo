@@ -56,6 +56,58 @@ fn main() {
 
     let f = &x;  // new immutable borrow of x
     println!("f: {}", f);
+
+    // String slices as references
+    let mut s = String::from("hello there");
+    let hello = &s[..5];  // 0 is optional
+    let there = &s[6..11];  // could also be [6..] to include all the rest
+    println!("{}! {}!", hello, there);
+
+    // These are also the same
+    let len = s.len();
+    let hello_there = &s[0..len];
+    println!("{}", hello_there);
+
+    let hello_there = &s[..len];
+    println!("{}", hello_there);
+
+    let hello_there = &s[0..];
+    println!("{}", hello_there);
+
+    let hello_there = &s[..];  // start to finish
+    println!("{}", hello_there);
+
+    //
+    let hello = first_word(&s);  // hello is a reference/slice
+    println!("{}", hello);
+    // Therefore can't borrow s as mutable while hello is in scope
+    let x = &mut s;
+    x.push_str("haha");
+    println!("{}", x);
+    // println!("{}", hello);  // won't compile
+    s.clear();  // clear s
+    // println!("{}", hello);  // won't compile because s would be trying to borrow mutable when hello
+                               // already is an immutable borrow still in scope
+
+    // It's better to use first_word_better because it takes &str as input, which works on
+    // other slices as well as literals and String
+    let x = "hello there";
+
+    let hello = first_word_better(x);  // copy
+    println!("{}", hello);
+
+    let hello = first_word_better(&x);  // reference
+    println!("{}", hello);
+
+    let hello = first_word_better(&x[..]);  // slice
+    println!("{}", hello);
+
+    let x = String::from("hello there");
+    let hello = first_word_better(&x);  // deref coercion
+    println!("{}", hello);
+
+    let hello = first_word_better(&x[..]);  // slice
+    println!("{}", hello);
 }
 
 fn some_function(value: String) {
@@ -82,4 +134,27 @@ fn value_by_reference(value: &String) -> usize {
 fn value_by_mutable_reference(value: &mut String) -> usize {
     value.push_str("haha");
     value.len()
+}
+
+// return slice containing first word in sentence
+fn first_word(phrase: &String) -> &str {
+    let in_bytes = phrase.as_bytes();
+    for (index, &item) in in_bytes.iter().enumerate() {
+        if item == b' ' {
+            return &phrase[0..index];
+        }
+    }
+
+    &phrase[..]
+}
+
+fn first_word_better(phrase: &str) -> &str {
+    let in_bytes = phrase.as_bytes();
+    for (index, &item) in in_bytes.iter().enumerate() {
+        if item == b' ' {
+            return &phrase[0..index];
+        }
+    }
+
+    &phrase[..]
 }
