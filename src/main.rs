@@ -4,6 +4,27 @@ struct Rectangle {
     height: u32
 }
 
+// Area method for Rectangle
+impl Rectangle {
+    fn area(&self) -> u32 {  // also valid: self: &Self
+        self.width * self.height
+    }
+
+    // Can have a method with the same name as a field
+    // Usual use case is for getter methods, to make field private and enable read-only access
+    fn width(&self) -> bool {
+        self.width > 0
+    }
+
+    fn can_hold(&self, other: &Self) -> bool {
+        other.width < self.width && other.height < self.height
+    }
+
+    fn square(size: u32) -> Rectangle {
+        Rectangle{width: size, height: size}
+    }
+}
+
 fn main() {
     let width = 50;
     let height = 30;
@@ -35,6 +56,33 @@ fn main() {
 
     dbg!(&rect);
 
+    // Area using method
+    println!("Area is: {}", rect.area());
+
+    // Using method and field with the same name
+    if rect.width() {
+        println!("Rect has width and it is {}", rect.width);
+    }
+
+    // Can hold?
+    let rect_1 = Rectangle {
+        width: 100,
+        height: 80
+    };
+
+    let rect_2 = Rectangle {
+        width: 120,
+        height: 40
+    };
+
+    let rect_3 = &rect;
+
+    println!("Can rect_1 hold rect_2? {}", rect_1.can_hold(&rect_2));
+    println!("Can rect_1 hold rect_3? {}", rect_1.can_hold(&rect_3));
+    println!("Can rect_2 hold rect_3? {}", rect_2.can_hold(&rect_3));
+
+    let square = Rectangle::square(100);
+    dbg!(square);
 }
 
 fn calculate_area_separate_parameters(w: u32, h: u32) -> u32 {
