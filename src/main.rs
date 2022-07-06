@@ -20,3 +20,16 @@ fn main() {
     // Call to library code of same name as package
     hello_cargo::eat_at_restaurant();
 }
+
+
+// When an enum is public all variants are public
+pub enum Test {
+    VariantA,
+    VariantB(String)
+}
+
+// When a struct is public each field needs to be marked public on a per-case basis
+pub struct TestStruct {
+    pub fieldA: String,
+    fieldB_is_private: u32
+}
