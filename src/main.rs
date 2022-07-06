@@ -1,3 +1,7 @@
+// Declares module garden
+// Code is inside src/garden.rs or src/garden/mod.rs
+pub mod garden;
+
 fn main() {
     // Package = top level, cargo feature that contains one or more crates
     // and their relationships. Has a Cargo.toml file
@@ -9,5 +13,7 @@ fn main() {
     // Can have both at the same time
 
     // For multiple binary crates, place files in src/bin directory
-    println!("Hello, world!");
+
+    use garden::vegetables::Asparagus;
+    println!("Here is an Aspargus {:#?}", Asparagus{});
 }
