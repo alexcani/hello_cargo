@@ -16,4 +16,7 @@ fn main() {
 
     use garden::vegetables::Asparagus;
     println!("Here is an Aspargus {:#?}", Asparagus{});
+
+    // Call to library code of same name as package
+    hello_cargo::eat_at_restaurant();
 }
