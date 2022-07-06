@@ -70,3 +70,14 @@ pub fn eat_at_restaurant() {
 // Re-exporting names as other name
 pub use front_of_house::hosting as host_api;
 // The exported name must already be public
+
+// Nested paths in use
+mod aa {
+    // Includes both
+    use crate::front_of_house::{hosting, hosting::add_to_waitlist};
+    // or
+    mod b {
+        // Use self to include hosting
+        use crate::front_of_house::hosting::{self, add_to_waitlist};
+    }
+}
