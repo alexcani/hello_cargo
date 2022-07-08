@@ -78,4 +78,73 @@ fn main() {
     for b in "नमस्ते".bytes() {  // .bytes() returns each byte, 18 in this case
         println!("{}", b);
     }
+
+    // HashMaps
+    use std::collections::HashMap;
+    let mut scores = HashMap::new();
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Red"), 30);
+
+    {
+        // Also by using 'collect' on a vector of tuples
+        // Vectors for team names and scores
+        let teams = vec![String::from("Blue"), String::from("Yellow")];
+        let initial_scores = vec![10, 50];
+
+        // creates vector of tuples by zipping the iterators, then collects
+        // Needs to specify HashMap because can collect to other data structures as well
+        // types in HashMap stay inferred by using _
+        let mut _scores: HashMap<_, _> =
+            teams.into_iter().zip(initial_scores.into_iter()).collect();
+    }
+
+    let key_name = String::from("Yellow");
+    let key_value = 30;
+    scores.insert(key_name, key_value);
+    // key_name is moved into the map, key_name is now invalid
+    //println!("key name: {}", key_name);  won't work
+
+    // Accessing
+    let blue_value = scores.get("Blue");
+    // blue_value is an Option with a reference to the value inside
+    match blue_value {
+        Some(x) => println!("Blue's score is {}", x),
+        None => ()
+    }
+
+    // or with if let
+    if let Some(x) = scores.get("Blue") {
+        println!("Blue's score is {}", x);
+    }
+
+    // Iterate
+    for (key, value) in scores.iter() {
+        println!("{}: {}", key, value);
+    }
+    // or
+    for (key, value) in &scores {
+        println!("{}: {}", key, value);
+    }
+
+    // Overwriting value
+    scores.insert(String::from("Red"), 50);
+    scores.insert(String::from("Red"), 60);
+    println!("{:?}", scores);
+
+    // Only insert if key doesn't exist: entry
+    scores.entry(String::from("Purple")).or_insert(140);
+    scores.entry(String::from("Purple")).or_insert(160);  // 140 remains
+    println!("{:?}", scores);
+    // or_insert returns a mutable reference to the value, either the new one or the previous one
+
+    // and_modify provides inplace modification if value exists
+    scores.entry(String::from("Purple")).and_modify(|e| {*e += 1});  // uses lambda to modify element inplace
+
+    // nice in constructs such as:
+    scores.entry(String::from("Brown")).and_modify(|e| {*e += 1}).or_insert(50);
+    println!("{:?}", scores);
+    // if exists, increment by 1, otherwise insert with 50
+    scores.entry(String::from("Brown")).and_modify(|e| {*e += 1}).or_insert(50);
+    println!("{:?}", scores);
+
 }
