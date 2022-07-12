@@ -183,3 +183,11 @@ fn returns_summarizable() -> impl Summary {
     // However, the exact return type must be a single one
     // Can't do some if-else and return a NewsArticle OR a Tweet
 }
+
+
+// Can do things like implement Traits for any type T that also implements some
+// other trait
+// impl<T: TraitBound> Trait for T {
+//     here we implement Trait for any type T that satisfies the condition of implementing TraitBound
+//     this is called a 'blanket implementation'
+//}
