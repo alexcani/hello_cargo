@@ -2,11 +2,11 @@ fn main() {
     let number_list = vec![2, 27, 15, 5, 10, 12];
     let char_list = vec!['y', 'm', 'b', 'z', 'u'];
 
-    //let result = largest(&number_list);
-    //println!("Largest number is {}", result);
+    let result = largest(&number_list);
+    println!("Largest number is {}", result);
 
-    //let result = largest(&char_list);
-    //println!("Largest char is {}", result);
+    let result = largest(&char_list);
+    println!("Largest char is {}", result);
 
     let integer_point = Point{x: 3, y: 7};
     let float_point = Point{x: 4.0, y: 5.7};
@@ -47,17 +47,16 @@ fn main() {
     notify(&returns_summarizable());
 }
 
-fn largest<T>(list: &[T]) {//-> T {
-    //let mut largest_v = list[0];
+fn largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest_v = &list[0];
 
-    /*for item in list {
+    for item in list {
         if item > largest_v {
             largest_v = item;
         }
-    }*/
+    }
 
-    //largest_v
-    //list[0]
+    largest_v
 }
 
 #[derive(Debug)]
