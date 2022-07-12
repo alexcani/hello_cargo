@@ -40,6 +40,11 @@ fn main() {
     };
 
     println!("New article available! {}", article.summarize());
+
+    notify(&article);
+    notify(&tweet);
+
+    notify(&returns_summarizable());
 }
 
 fn largest<T>(list: &[T]) {//-> T {
@@ -79,7 +84,7 @@ impl Point<f32> {  // impl is not generic, specific for f32
 pub trait Summary {
     fn summarize(&self) -> String {
         // Default implementation
-        format!("(Read more...)")
+        format!("(Read more from...)")
     }
 }
 
@@ -121,3 +126,61 @@ impl Summary for Tweet {
 
 // the only restriction is called coherence: either the type or the trait (or both) must be from
 // the local crate
+
+// Traits as parameters
+
+// This is syntactic sugar for the version below
+/*fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}*/
+
+// With trait bound
+fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+
+// The 2 versions offers some tradeoffs when it comes to readability and expression
+//
+// pub fn notify(item1: &impl Summary, item2: &impl Summary)
+//
+// item1 and item2 can be of different types, as long as they implement Summary
+
+//
+// pub fn notify<T: Summary>(item1: &T, item2: &T)
+//
+// both item1 and item2 must be of same type T, and T must implement Summary
+
+// Multiple trait bound:
+// pub fn notify(item1: &(impl Summary + Display))
+//use std::fmt::Display;
+// item needs to implement both traits
+//pub fn notify(item: &(impl Summary + Display)) {}
+
+// trait bound version:
+//pub fn notify<T: Summary + Display>(item: &T) {}
+
+// Alternative syntax of trait bounds using where clause
+/*use std::fmt::Display;
+pub fn notify_syntax<T>(item: &T)
+    where T: Summary + Display {
+
+}*/
+
+/*fn some_function<T, U>(t: &T, u: &U) -> i32
+    where T: Display + Clone,
+          U: Clone + Debug
+*/
+
+// Can also use traits in return type specification
+fn returns_summarizable() -> impl Summary {
+    Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    }
+    // However, the exact return type must be a single one
+    // Can't do some if-else and return a NewsArticle OR a Tweet
+}
