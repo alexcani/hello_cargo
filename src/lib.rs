@@ -24,8 +24,8 @@ impl Guess {
     }
 }
 
-#[cfg(test)]
-mod tests {
+#[cfg(test)]  // only compiles in test build
+mod tests {  // placed along with the source code it tests
     use super::*;
 
     #[test]
