@@ -23,10 +23,50 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    println!("Search for {} in {}", config.query, config.filename);
-
     let file_content = fs::read_to_string(config.filename)?;
-    println!("File contents: {}", file_content);
+
+    for line in search(&config.query, &file_content) {
+        println!("{}", line);
+    }
 
     Ok(())
+}
+
+fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut result: Vec<&str> = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            result.push(line);
+        }
+    }
+
+    result
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn no_results() {
+        let query = "not here";
+        let contents = "\
+The will not be such
+string in this
+text";
+        assert!(search(query, contents).is_empty());
+    }
 }
