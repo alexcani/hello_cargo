@@ -76,7 +76,27 @@ fn hello(x: &str) {
 }
 
 
-// Drop trait
-fn drop_trait_tests() {
 
+// Drop trait
+struct CustomSmartPointer {
+    data: String
+}
+
+impl Drop for CustomSmartPointer {
+    fn drop(&mut self) {
+        println!("Dropping CustomSmartPointer with data {}", self.data);
+    }
+}
+
+fn drop_trait_tests() {
+    let a = CustomSmartPointer {
+        data: String::from("stuff")
+    };
+    let b = CustomSmartPointer {
+        data: String::from("other stuff")
+    };
+    println!("Created smart pointers");
+    drop(b);
+
+    println!("Called drop")
 }
