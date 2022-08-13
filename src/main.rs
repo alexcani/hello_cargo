@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use std::rc::Rc;
 
 fn main() {
     // Smart pointers
@@ -16,18 +17,19 @@ fn main() {
     // Enabling recursive types with Box
     // For when you can't know the size of a type at compile time
     use List::{Cons, Nil};
-    let con_list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Cons(4, Box::new(Nil))))))));
+    let con_list = Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Cons(4, Rc::new(Nil))))))));
     println!("{:?}", con_list);
 
     deref_operator_tests();
     drop_trait_tests();
+    rc_pointer_tests();
 }
 
 // Cons list example using Box
 // It's a recursive type
 #[derive(Debug)]
 enum List {
-    Cons(i32, Box<List>),  // contains the value and the next element. List needs to be a Box so it has fixed size
+    Cons(i32, Rc<List>),  // contains the value and the next element. List needs to be a Box so it has fixed size
     Nil               // or contains Nil
 }
 
@@ -99,4 +101,19 @@ fn drop_trait_tests() {
     drop(b);
 
     println!("Called drop")
+}
+
+fn rc_pointer_tests() {
+    use crate::List::{Cons, Nil};
+    let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+    dbg!(Rc::strong_count(&a));
+
+    let b = Cons(3, Rc::clone(&a));  // could have called a.clone()
+    dbg!(Rc::strong_count(&a));
+    {
+        let c = Cons(4, Rc::clone(&a));  // but Rust convention is Rc::clone
+        println!("{:?}\n{:?}", b, c);
+        dbg!(Rc::strong_count(&a));
+    }
+    dbg!(Rc::strong_count(&a));
 }
