@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -23,6 +24,7 @@ fn main() {
     deref_operator_tests();
     drop_trait_tests();
     rc_pointer_tests();
+    refcell_tests();
 }
 
 // Cons list example using Box
@@ -116,4 +118,42 @@ fn rc_pointer_tests() {
         dbg!(Rc::strong_count(&a));
     }
     dbg!(Rc::strong_count(&a));
+}
+
+#[derive(Debug)]
+enum ListRC {
+    Cons(Rc<RefCell<i32>>, Rc<ListRC>),
+    Nil
+}
+
+fn refcell_tests() {
+    // RefCell is used to enforce borrowing rules at runtime instead of compile time
+    // Interior Mutability: A Mutable Borrow to an Immutable Value
+    let _x = 5;
+    // let y = &mut _x; fails
+
+    // Make a conlist with refcell
+    use ListRC::*;
+    let a = Rc::new(Cons(Rc::new(RefCell::new(5)), Rc::new(Nil)));
+    println!("{:?}", a);
+
+    let b = Rc::new(Cons(Rc::new(RefCell::new(3)), Rc::clone(&a)));
+    let c = Rc::new(Cons(Rc::new(RefCell::new(4)), Rc::clone(&a)));
+    println!("{:?}\n{:?}", b, c);
+
+    // Change via 'a'
+    if let Cons(x, _) = &*a {
+        *x.borrow_mut() = 6;
+    }
+
+    println!("{:?}\n{:?}\n{:?}", a, b, c);
+
+    // Change via 'b'
+    if let Cons(_, x) = &*b {
+        if let Cons(x, y) = &**x {
+            *x.borrow_mut() = 7;
+        }
+    }
+
+    println!("{:?}\n{:?}\n{:?}", a, b, c);
 }
