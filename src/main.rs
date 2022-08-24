@@ -3,6 +3,7 @@ use std::{thread, time::Duration, sync::mpsc};
 fn main() {
     basic_stuff();
     message_passing_concurrency();
+    shared_state_concurrency();
 }
 
 fn basic_stuff() {
@@ -103,4 +104,8 @@ fn message_passing_concurrency() {
     for received in rx {
         println!("Got: {}", received);
     }
+}
+
+fn shared_state_concurrency() {
+
 }
