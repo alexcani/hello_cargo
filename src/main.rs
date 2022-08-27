@@ -1,8 +1,8 @@
 use std::{thread, time::Duration, sync::mpsc};
 
 fn main() {
-    basic_stuff();
-    message_passing_concurrency();
+    //basic_stuff();
+    //message_passing_concurrency();
     shared_state_concurrency();
 }
 
@@ -107,5 +107,29 @@ fn message_passing_concurrency() {
 }
 
 fn shared_state_concurrency() {
+    use std::sync::Mutex;
 
+    let m = Mutex::new(5);
+    {
+        let mut num = m.lock().unwrap();
+        *num = 6;
+    }
+
+    println!("{:?}", m);
+
+    // Increment wiht multiple threads
+    let counter = Mutex::new(10);
+    let mut t_handles = vec![];
+
+    for _ in 0..10 {
+        let handle = thread::spawn(move || {
+            let mut val = counter.lock().unwrap();
+            *val += 1;
+        });
+        t_handles.push(handle);
+    }
+
+    for i in t_handles {
+        i.join().unwrap();
+    }
 }
