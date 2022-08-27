@@ -108,6 +108,7 @@ fn message_passing_concurrency() {
 
 fn shared_state_concurrency() {
     use std::sync::Mutex;
+    use std::sync::Arc;
 
     let m = Mutex::new(5);
     {
@@ -118,10 +119,12 @@ fn shared_state_concurrency() {
     println!("{:?}", m);
 
     // Increment wiht multiple threads
-    let counter = Mutex::new(10);
+    // Rc is no thread-safe, so we usa Arc
+    let counter = Arc::new(Mutex::new(0));
     let mut t_handles = vec![];
 
     for _ in 0..10 {
+        let counter = Arc::clone(&counter);
         let handle = thread::spawn(move || {
             let mut val = counter.lock().unwrap();
             *val += 1;
@@ -132,4 +135,6 @@ fn shared_state_concurrency() {
     for i in t_handles {
         i.join().unwrap();
     }
+
+    println!("Result: {:?}", counter);
 }
