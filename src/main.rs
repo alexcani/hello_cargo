@@ -43,4 +43,22 @@ fn main() {
 
     Pancakes::hello_macro_fn();
     Pancakes::ha();
+
+
+    // Attribute-like macros
+    // #[route(GET, "/")]  for example
+    fn index() {}
+
+    // Works the same way, definition must be inside a
+    // proc-macro crate
+    // Check my_lib_derive lib.src
+
+
+    // Function-like macros
+    // Similar to declarative macro when calling but instead of following the macro_rules! matching syntax
+    // it works like a proc-macro with TokenStream
+    // Example is
+    // sql!(SELECT * FROM posts WHERE x > 1)
+    // Which can parse sql code and check for syntax validity among other things
+    // Definition must be inside proc-macro crate, check my_lib_derive
 }
