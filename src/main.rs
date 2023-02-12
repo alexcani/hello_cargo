@@ -1,3 +1,35 @@
+use std::{
+    io::{BufRead, BufReader, Write},
+    net::{TcpListener, TcpStream},
+    fs,
+};
+
 fn main() {
-    println!("Hello, world!");
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+
+        handle_connection(stream);
+    }
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    let buf_reader = BufReader::new(&stream);
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+
+    println!("Request: {:#?}", http_request);
+
+    let status = "HTTP/1.1 200 OK";
+
+    // Read the file
+    let file_contents = fs::read_to_string("hello.html").unwrap();
+    let length = file_contents.len();
+
+    let response = format!("{status}\r\nContent-Length: {length}\r\n\r\n{file_contents}");
+    stream.write_all(response.as_bytes()).unwrap();
 }
