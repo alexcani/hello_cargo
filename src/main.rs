@@ -1,9 +1,11 @@
+use ctrlc;
 use std::{
     fs,
     io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
-    time::{Duration},
+    sync::{Arc, Mutex},
     thread,
+    time::Duration,
 };
 
 use web_server::ThreadPool;
@@ -12,11 +14,26 @@ fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
     let pool = ThreadPool::new(4);
 
-    for stream in listener.incoming().take(2) {
+    let should_shutdown = Arc::new(Mutex::new(false));
+
+    {
+        let should_shutdown = Arc::clone(&should_shutdown);
+        ctrlc::set_handler(move || {
+            println!("Got CTRL+C, will shut down");
+            *should_shutdown.lock().unwrap() = true;
+        })
+        .unwrap();
+    }
+
+    for stream in listener.incoming() {
         let stream = stream.unwrap();
         pool.run(move || {
             handle_connection(stream);
         });
+
+        if *should_shutdown.lock().unwrap() {
+            break;
+        }
     }
 
     println!("Shutting down");
@@ -31,20 +48,20 @@ fn handle_connection(mut stream: TcpStream) {
         "GET /sleep HTTP/1.1" => {
             thread::sleep(Duration::from_secs(10));
             ("HTTP/1.1 200 OK", "hello.html")
-        },
+        }
         "GET /sleep2 HTTP/1.1" => {
             thread::sleep(Duration::from_secs(10));
             ("HTTP/1.1 200 OK", "hello.html")
-        },
+        }
         "GET /sleep3 HTTP/1.1" => {
             thread::sleep(Duration::from_secs(10));
             ("HTTP/1.1 200 OK", "hello.html")
-        },
+        }
         "GET /sleep4 HTTP/1.1" => {
             thread::sleep(Duration::from_secs(10));
             ("HTTP/1.1 200 OK", "hello.html")
         }
-        _ => ("HTTP/1.1 404 NOT FOUND", "404.html")
+        _ => ("HTTP/1.1 404 NOT FOUND", "404.html"),
     };
 
     let file_contents = fs::read_to_string(file).unwrap();
@@ -52,5 +69,5 @@ fn handle_connection(mut stream: TcpStream) {
     let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{file_contents}");
     stream.write_all(response.as_bytes()).unwrap();
 
-    println!("[{:#?}] Request: {:#?}", chrono::Local::now(),http_request);
+    println!("[{:#?}] Request: {:#?}", chrono::Local::now(), http_request);
 }
