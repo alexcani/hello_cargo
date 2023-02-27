@@ -10,16 +10,24 @@ type Job = Box<dyn FnOnce() + Send + 'static>;
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    sender: Option<mpsc::Sender<Job>>,
 }
 
 impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
         let thread = thread::spawn(move || loop {
-            let job = receiver.lock().unwrap().recv().unwrap();
+            let message = receiver.lock().unwrap().recv();
 
-            println!("Worker {id} got a job. Executing.");
-            job();
+            match message {
+                Ok(job) => {
+                    println!("Worker {id} got a job. Executing.");
+                    job();
+                },
+                Err(_) => {
+                    println!("Worker {id} disconnected; shutting down.");
+                    break;
+                }
+            }
         });
 
         Worker {
@@ -46,7 +54,7 @@ impl ThreadPool {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
-        ThreadPool { workers, sender }
+        ThreadPool { workers, sender: Some(sender) }
     }
 
     pub fn run<F>(&self, f: F)
@@ -54,12 +62,14 @@ impl ThreadPool {
         F: FnOnce(),
         F: Send + 'static,
     {
-        self.sender.send(Box::new(f)).unwrap();
+        self.sender.as_ref().unwrap().send(Box::new(f)).unwrap();
     }
 }
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
+        drop(self.sender.take());
+
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
             worker.thread.take().unwrap().join().unwrap();
