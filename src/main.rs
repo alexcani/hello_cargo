@@ -1,4 +1,3 @@
-use ctrlc;
 use std::{
     fs,
     io::{BufRead, BufReader, Write},
